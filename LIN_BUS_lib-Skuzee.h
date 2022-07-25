@@ -6,7 +6,7 @@
 #pragma once
 
 // Includes
-#include "Arduino.h"
+#include <Arduino.h>
 
 // Define which parts of the data frame do what. Sync, PID, 2-8 Data bytes, Checksum, Breakfield.
 #define SYNC 0
@@ -32,21 +32,25 @@ typedef union {
 } LIN_Data_t;
 
 
-class LINtransceiver : LIN_Data_t{
+class LINtransceiver {
 	public:
+		LINtransceiver(uint8_t _TX_Pin, uint8_t _RX_Pin, uint16_t _Baud, uint8_t _CS_Pin);
+		
+		LINtransceiver(uint8_t _TX_Pin, uint8_t _RX_Pin, uint16_t _Baud, uint8_t _CS_Pin, bool _legacyMode);
+		
 		void initLIN(void); // start serial connections, configure pins
 		bool read(void); // returns true when LIN Data is ready.
-		bool validateIDChecksum(LIN_Data_t LIN_Data);
+		bool validateIDChecksum(uint8_t pid);
 		bool validateDataChecksumClassic(LIN_Data_t LIN_Data);
 		bool validateDataChecksumEnhanced(LIN_Data_t LIN_Data);
 		uint8_t calculateDLC(uint8_t id); // returns Data Length Control (Number of bytes in the data payload)
-		LIN_Data_t getData();
-		unsigned long getTimestampOfLastByte();
+		LIN_Data_t getData(void);
+		unsigned long getTimestampOfLastByte(void);
 
 	private:
 		uint8_t LIN_TX_Pin = 1;
 		uint8_t LIN_RX_Pin = 0;
-		unsigned long LIN_Baud 9600UL;
+		unsigned long LIN_Baud = 9600UL;
 		uint8_t CS_Pin = 2;
 		bool legacyMode = false;
 		
@@ -54,6 +58,6 @@ class LINtransceiver : LIN_Data_t{
 		LIN_Data_t LINverifiedData;
 		uint8_t incomingByte;
 		uint8_t prevByte;
-		int8_t data_counter; // data_counter counts LINworkingData.rawData position, and corresponds to data type.
+		int8_t LINcounter; // data_counter counts LINworkingData.rawData position, and corresponds to data type.
 		unsigned long timestampOfLastByte;
-}
+};

@@ -3,7 +3,7 @@
 // The second controller is a Digispark and is in the battery box of the car and actuates the relays.
 
 #include <avr/sleep.h>
-#include <LIN_BUS_lib-Skuzee>
+#include <LIN_BUS_lib-Skuzee.h>
 
 // define pins for LIN transceiver communication
 #define LIN_TX_PIN 1
@@ -88,6 +88,6 @@ void arduinoToSleep() { // puts arduino to sleep if there is no communication.
 void arduinoWakeUp() {
   sleep_disable();
   detachInterrupt(digitalPinToInterrupt(LIN_RX_PIN));
-  Serial1.begin(LIN_BAUD,SERIAL_8N1);
+  myLIN.initLIN();
   Serial.println("Good Morning!");
 }

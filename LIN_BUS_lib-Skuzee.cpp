@@ -1,5 +1,5 @@
 // Includes
-#include "Arduino.h"
+#include <Arduino.h>
 #include "LIN_BUS_lib-Skuzee.h"
 
 
@@ -22,7 +22,7 @@ LINtransceiver::LINtransceiver(uint8_t _TX_Pin, uint8_t _RX_Pin, uint16_t _Baud,
 	initLIN();
 }
 
-LINtransceiver::initLIN(void) {
+void LINtransceiver::initLIN(void) {
   Serial1.begin(LIN_Baud, SERIAL_8N1); // Serial 1 is the Tx/Rx pins that make a serial connection to the LIN transciever.
   
   pinMode(CS_Pin, OUTPUT); // Chip Select / Enable Pin
@@ -31,7 +31,7 @@ LINtransceiver::initLIN(void) {
   digitalWrite(LIN_TX_Pin, LOW); // LIN_TX_Pin LOW = TXoff Mode, HIGH = Operation Mode. // If you want the LIN transceiver to transmit then this pin must be high when doing so.
 }
 
-LINtransceiver::read(void) {
+bool LINtransceiver::read(void) {
 	// waitUntilNextMessage: waits/reads until SYNC and then reads next 10 bytes. Useful if you only want to do something once a message has been recieved. returns whole message
 	// justReadOneByte: just reads the next byte, and deals with it. Useful if you need to do other stuff with your program and want to just deal with the messages when they're ready. returns a bool, when finished message can be got with getMessage. if(readonebyte) then getMessage.
 	// parse message: does the same thing for both, either one at a time or all togther.
@@ -79,7 +79,7 @@ LINtransceiver::read(void) {
   }
 }
 
-LINtransceiver::validateIDChecksum(uint8_t pid) {
+bool LINtransceiver:: validateIDChecksum(uint8_t pid) {
 	uint8_t pidSum;
 	// Is this Exclusive OR, or some sort of modulo/addition?
 	// The parity bits are calculated as follows:
@@ -88,7 +88,7 @@ LINtransceiver::validateIDChecksum(uint8_t pid) {
 
 }
 
-LINtransceiver::validateDataChecksumClassic(LIN_Data_t LIN_Data) {
+bool LINtransceiver:: validateDataChecksumClassic(LIN_Data_t LIN_Data) {
 	// Classic Checksum is imverted eight bit sum of all data bytes in the message. 
 	// "Always used for diagnostic frames."
 	// "Is used for identifiers 0x3C to 0x3F (60 to 63)"
@@ -103,21 +103,21 @@ LINtransceiver::validateDataChecksumClassic(LIN_Data_t LIN_Data) {
   return (byteSum == 0xFF); 
 }
 
-LINtransceiver::validateDataChecksumEnhanced(LIN_Data_t LIN_Data) {
+bool LINtransceiver:: validateDataChecksumEnhanced(LIN_Data_t LIN_Data) {
 	// The enhanced checksum is inverted eight bit sum of all data bytes in the message and protected identifier. 
 	// "Is used for identifiers 0x00 to 0x3B (0 to 59)"
 	
   uint8_t byteSum;
 	
   for (uint8_t i = 0; i < 9; i++) { // 1 pid and 8 data bytes
-    byteSum += LIN_Data.RawData[i+1];
+    byteSum += LIN_Data.rawData[i+1];
 	}
 	
 	// Sum of data + checksum should equal 0xFF
   return (byteSum == 0xFF); 
 }
 
-LINtransceiver::calculateDLC(uint8_t id) { // calculate the number of data bytes based on ID value
+uint8_t LINtransceiver::calculateDLC(uint8_t id) { // calculate the number of data bytes based on ID value
 	
   if (id <= 0x1F) // 31
     return 2;
@@ -130,10 +130,10 @@ LINtransceiver::calculateDLC(uint8_t id) { // calculate the number of data bytes
 }
 
 
-LINtransceiver::getData() {
+LIN_Data_t LINtransceiver::getData() {
 	return LINverifiedData;
 }
 
-LINtransceiver::getTimestampOfLastByte() {
+unsigned long LINtransceiver::getTimestampOfLastByte() {
 	return timestampOfLastByte;
 }
