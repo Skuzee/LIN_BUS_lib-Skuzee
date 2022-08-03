@@ -1,5 +1,5 @@
-// Pro Micro reads the LIN data, and monitors LIN buttons and dash buttons. It is located in the dash. 
-// It sends the commands over a serial connection to another controller. 
+// Pro Micro reads the LIN data, and monitors LIN buttons and dash buttons. It is located in the dash.
+// It sends the commands over a serial connection to another controller.
 // The second controller is a Digispark and is in the battery box of the car and actuates the relays.
 
 #include <avr/sleep.h>
@@ -13,20 +13,18 @@
 LINtransceiver myLIN(LIN_TX_PIN, LIN_RX_PIN, 9600, CS_PIN);
 
 void setup() {
-
   Serial.begin(115200); // Serial is USB serial!
 }
 
 
 void loop() {
-
-  if(millis()-myLIN.getTimestampOfLastByte()>=30000) { // if it has been 10 seconds since the last LIN data signal...
+  if (millis() - myLIN.getTimestampOfLastByte() >= 30000) { // if it has been 10 seconds since the last LIN data signal...
     arduinoToSleep(); // Put the arduino to sleep to save power.
-	}
-	
-	if(myLIN.read()) {
-		printData(myLIN.getData());
-	}
+  }
+
+  if (myLIN.read()) {
+    printData(myLIN.getData());
+  }
 
 }
 
@@ -76,7 +74,7 @@ void arduinoToSleep() { // puts arduino to sleep if there is no communication.
   Serial1.flush();
   Serial1.end();
   sleep_enable();
-  pinMode(LIN_RX_PIN,INPUT);
+  pinMode(LIN_RX_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(LIN_RX_PIN), arduinoWakeUp, FALLING);
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   cli();
